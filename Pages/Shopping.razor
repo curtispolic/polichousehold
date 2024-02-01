@@ -1,0 +1,39 @@
+﻿@page "/Shopping"
+
+<PageTitle>Shopping List</PageTitle>
+<AuthorizeView>
+    <h1>Things for Curtis to buy on the walk home</h1>
+
+    <ul>
+        @foreach (var item in shoppinglist)
+        {
+            <li>
+                <input @bind="item.Amount" />
+                <input @bind="item.Name" />
+            </li>
+        }
+    </ul>
+
+    <input type="number" placeholder="Quantity" min="1" @bind=newAmount />
+    <input placeholder="Item" @bind="newItem" />
+    <button @onclick="AddItem">Add to list</button>
+
+
+</AuthorizeView>
+
+@code
+{
+    private List<ShoppingItem> shoppinglist = new();
+    private string? newItem;
+    private int newAmount;
+
+    private void AddItem()
+    {
+        if (!string.IsNullOrEmpty(newItem) && newAmount > 0)
+        {
+            shoppinglist.Add(new ShoppingItem { Name = newItem, Amount = newAmount});
+            newItem = "";
+            newAmount = 0;
+        }
+    }
+}
