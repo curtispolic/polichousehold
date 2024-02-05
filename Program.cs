@@ -13,6 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
+// Authentication services
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -20,11 +21,12 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
+builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
+
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
-builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
-
+// Creates the Service and Context for Shopping database integration
 builder.Services.AddDbContext<ShoppingContext>(options =>
 {
     options.UseSqlite("Data Source = Shopping.db");
@@ -34,6 +36,7 @@ builder.Services.AddScoped<ShoppingService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+// Testing APIs can be integrated in the IsDevelopment area
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
@@ -46,15 +49,12 @@ else
 }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
+// Seed the database if the .db file doesn't exist.
 app.CreateDbIfNotExists();
 
 app.MapBlazorHub();

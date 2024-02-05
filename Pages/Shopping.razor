@@ -19,6 +19,7 @@
         }
     </ul>
 
+    <!-- Binding is very cool I love this feature -->
     <input type="number" placeholder="Quantity" min="1" @bind=newAmount />
     <input placeholder="Item" @bind="newItem" />
     <button @onclick="AddItem">Add to list</button>
@@ -27,13 +28,15 @@
 
 @code
 {
-    // bro i literally dont know wtf to do here
+    // Empty list for the moment
     private List<ShoppingItem> shoppinglist = new List<ShoppingItem>();
     private string? newItem;
     private int newAmount;
 
+    // Ideally this would be done asynchronously but this works for now
     protected override void OnInitialized()
     {
+        // Need to instantiate on Init or it won't work
         shoppinglist = service.GetAll();
     }
 

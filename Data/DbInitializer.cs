@@ -4,6 +4,7 @@ namespace polichousehold.Data
 {
     public static class DbInitializer
     {
+        // Seeds the db with a test item if it is empty
         public static void Initialize(ShoppingContext context)
         {
             if (context.Items.Any())

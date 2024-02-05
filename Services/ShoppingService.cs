@@ -5,6 +5,12 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace polichousehold.Services;
 
+/*
+The service provides integration to the context and allows the commands to be simplified.
+This is where I'd keep all the logic for how I plan to interact with the context
+Also stops me from manually typing context.SaveChanges() a million times
+*/
+
 public class ShoppingService
 {
     private readonly ShoppingContext _context;
