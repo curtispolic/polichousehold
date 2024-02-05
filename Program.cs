@@ -7,6 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using polichousehold.Areas.Identity;
 using polichousehold.Data;
 using polichousehold.Services;
+using Microsoft.Extensions.FileProviders;
+using polichousehold.Repositories;
+using polichousehold.Utilities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +36,10 @@ builder.Services.AddDbContext<ShoppingContext>(options =>
 });
 builder.Services.AddScoped<ShoppingService>();
 
+// Image upload handling
+builder.Services.AddTransient<IImageUploadRepository, ImageUploadRepository>();
+builder.Services.AddTransient<IFileUploadService, FileUploadService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -50,6 +57,7 @@ else
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
 app.UseAuthorization();
 app.MapControllers();

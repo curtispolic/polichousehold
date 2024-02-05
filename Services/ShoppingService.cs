@@ -87,4 +87,18 @@ public class ShoppingService
 
         _context.SaveChanges();
     }
+
+    public void UpdateImage(int id, string imageName)
+    {
+        var item = _context.Items.Find(id);
+
+        if (item is null || imageName.IsNullOrEmpty())
+        {
+            throw new InvalidOperationException("Invalid item or image");
+        }
+
+        item.ImagePath = imageName;
+
+        _context.SaveChanges();
+    }
 }

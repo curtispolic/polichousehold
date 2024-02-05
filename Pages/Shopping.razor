@@ -1,12 +1,22 @@
 ﻿@page "/Shopping"
+
 @using polichousehold.Services
 @using polichousehold.Data
 @using polichousehold.Models
-@inject ShoppingService service
+@using polichousehold.Utilities
+@using polichousehold.Repositories
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.Extensions.Logging
+
+@inject ShoppingService shoppingService
+@inject ILogger<Shopping> logger
+@inject IFileUploadService fileService
+@inject IImageUploadRepository imageUploadRepository
+
 @namespace polichousehold
 
 <PageTitle>Shopping List</PageTitle>
-<AuthorizeView>
+<AuthorizeView Context="authContext">
     <h1>Things for Curtis to buy on the walk home</h1>
 
     <table>
@@ -25,11 +35,19 @@
                 <td>
                 @if (!string.IsNullOrEmpty(item.ImagePath))
                 {
-                    <img src=@item.ImagePath asp-append-version="true" width="300px" />
+                    <img src="Uploads/\@item.ImagePath" asp-append-version="true" width="300px" />
                 }
                 else
                 {
-                    <button @onclick="() => UploadImage(item.ID)">Upload Image</button>
+                    <EditForm Model="@imageModel" OnValidSubmit="() => HandleFormSubmit(item)" Context="formContext">
+                        File:<InputFile OnChange="@SelectFiles" />
+                        <br />
+                        <button type="submit">Upload</button>
+                    </EditForm>
+                    @if (loading)
+                    {
+                        <span>Uploading...</span>
+                    }
                 }
                 </td>
                 <td><button @onclick="() => UpdateItem(item.ID, item.Name, item.Amount)">Update Item</button></td>
@@ -53,23 +71,34 @@
     private string? newItem;
     private int newAmount;
 
-    // Ideally this would be done asynchronously but this works for now
-    protected override void OnInitialized()
+    // For the file uploading
+    bool loading = false;
+    List<string> messages = new();
+    List<IBrowserFile> files = new();
+    int maxFileSize = 1 * 1024 * 1024;
+    ImageFile imageModel = new();
+    List<ImageFile> images = new();
+
+    protected override async Task OnInitializedAsync()
     {
         // Need to instantiate on Init or it won't work
         RefreshList();
+        messages.Clear();
+        loading = true;
+        await LoadImages();
+        loading = false;
     }
 
     private void RefreshList()
     {
-        shoppinglist = service.GetAll();
+        shoppinglist = shoppingService.GetAll();
     }
 
     private void AddItem()
     {
         if (!string.IsNullOrEmpty(newItem) && newAmount > 0)
         {
-            service.Create(new ShoppingItem { Name = newItem, Amount = newAmount});
+            shoppingService.Create(new ShoppingItem { Name = newItem, Amount = newAmount});
             newItem = "";
             newAmount = 0;
             RefreshList();
@@ -78,18 +107,73 @@
 
     private void DeleteItem(int ID)
     {
-        service.DeleteById(ID);
+        shoppingService.DeleteById(ID);
         RefreshList();
     }
 
     private void UpdateItem(int ID, string name, int amount)
     {
-        service.Update(ID, name, amount);
+        shoppingService.Update(ID, name, amount);
         RefreshList();
     }
 
-    private void UploadImage(int ID)
+    private void AddImageToItem(int ID, string imageName)
     {
-        // Placeholder for image functionality
+        shoppingService.UpdateImage(ID, imageName);
+        RefreshList();
+    }
+
+    private async void SelectFiles(InputFileChangeEventArgs e)
+    {
+        files = e.GetMultipleFiles(maxFileSize).ToList();
+    }
+
+    private async Task HandleFormSubmit(ShoppingItem item)
+    {
+        loading = true;
+        messages.Clear();
+        var allowedExtenstions = new string[] { ".png", ".jpg", ".jpeg", ".gif" };
+        int count = 0;
+        foreach (var file in files)
+        {
+            try
+            {
+                (int statusCode, string statusMessage) = await fileService.UploadFileAsync(file, maxFileSize, allowedExtenstions);
+                if (statusCode == 1)
+                {
+                    messages.Add($"File : {file.Name} uploaded");
+                    AddImageToItem(item.ID, statusMessage);
+                    var imageData = new ImageFile
+                        {
+                            ImageName = statusMessage
+                        };
+                    //await imageUploadRepository.UploadImageToDb(imageData);
+                    count++;
+                }
+                else
+                    messages.Add(statusMessage);
+
+            }
+            catch (Exception ex)
+            {
+                messages.Add($"File : {file.Name} Error : {ex.Message}");
+                logger.LogError(ex.Message);
+            }
+        }
+
+        loading = false;
+        messages.Add($"{count}/{files.Count} uploaded");
+    }
+
+    private async Task LoadImages()
+    {
+        try
+        {
+            images = (await imageUploadRepository.GetImages()).ToList();
+        }
+        catch (Exception)
+        {
+            messages.Add("Could not load images");
+        }
     }
 }
