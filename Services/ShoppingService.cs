@@ -52,6 +52,14 @@ public class ShoppingService
         }        
     }
 
+    public void Update(int id, string newName, int newQuant)
+    {
+        UpdateQuantity(id, newQuant);
+        UpdateName(id, newName);
+        // Yes I know this saves changes twice and is time and access inefficient
+        // But at the moment I am being my time efficient
+    }
+
     public void UpdateQuantity(int id, int newQuant)
     {
         var item = _context.Items.Find(id);

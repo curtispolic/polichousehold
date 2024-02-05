@@ -15,8 +15,10 @@
             <li>
                 <input @bind="item.Amount" />
                 <input @bind="item.Name" />
+                <button @onclick="() => UpdateItem(item.ID, item.Name, item.Amount)">Update Item</button>
+                <button @onclick="() => DeleteItem(item.ID)">Delete Item </button>
             </li>
-        }
+        } <!-- The button needs a lambda onclick to pass the arguments to the function -->
     </ul>
 
     <!-- Binding is very cool I love this feature -->
@@ -37,6 +39,11 @@
     protected override void OnInitialized()
     {
         // Need to instantiate on Init or it won't work
+        RefreshList();
+    }
+
+    private void RefreshList()
+    {
         shoppinglist = service.GetAll();
     }
 
@@ -47,6 +54,19 @@
             service.Create(new ShoppingItem { Name = newItem, Amount = newAmount});
             newItem = "";
             newAmount = 0;
+            RefreshList();
         }
+    }
+
+    private void DeleteItem(int ID)
+    {
+        service.DeleteById(ID);
+        RefreshList();
+    }
+
+    private void UpdateItem(int ID, string name, int amount)
+    {
+        service.Update(ID, name, amount);
+        RefreshList();
     }
 }
