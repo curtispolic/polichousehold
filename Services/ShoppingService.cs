@@ -14,7 +14,7 @@ public class ShoppingService
         _context = context;
     }
 
-    public IEnumerable<ShoppingItem> GetAll()
+    public List<ShoppingItem> GetAll()
     {
         return _context.Items
             .AsNoTracking()

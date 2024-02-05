@@ -6,20 +6,30 @@ using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using polichousehold.Areas.Identity;
 using polichousehold.Data;
+using polichousehold.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
-builder.Services.AddSqlite<ShoppingContext>("Data Source=Shopping.db");
+
+builder.Services.AddDbContext<ShoppingContext>(options =>
+{
+    options.UseSqlite("Data Source = Shopping.db");
+});
+builder.Services.AddScoped<ShoppingService>();
 
 var app = builder.Build();
 
@@ -44,6 +54,9 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.CreateDbIfNotExists();
+
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 

@@ -1,5 +1,9 @@
 ﻿@page "/Shopping"
-@namespace polichousehold.Models
+@using polichousehold.Services
+@using polichousehold.Data
+@using polichousehold.Models
+@inject ShoppingService service
+@namespace polichousehold
 
 <PageTitle>Shopping List</PageTitle>
 <AuthorizeView>
@@ -19,20 +23,25 @@
     <input placeholder="Item" @bind="newItem" />
     <button @onclick="AddItem">Add to list</button>
 
-
 </AuthorizeView>
 
 @code
 {
-    private List<ShoppingItem> shoppinglist = new();
+    // bro i literally dont know wtf to do here
+    private List<ShoppingItem> shoppinglist = new List<ShoppingItem>();
     private string? newItem;
     private int newAmount;
+
+    protected override void OnInitialized()
+    {
+        shoppinglist = service.GetAll();
+    }
 
     private void AddItem()
     {
         if (!string.IsNullOrEmpty(newItem) && newAmount > 0)
         {
-            shoppinglist.Add(new ShoppingItem { Name = newItem, Amount = newAmount});
+            service.Create(new ShoppingItem { Name = newItem, Amount = newAmount});
             newItem = "";
             newAmount = 0;
         }
