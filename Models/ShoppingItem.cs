@@ -7,4 +7,5 @@ public class ShoppingItem
     public string? Name { get; set; }
     public int Amount {get; set; }
     public int ID {get; set; }
+    public string? ImagePath {get; set; }
 }

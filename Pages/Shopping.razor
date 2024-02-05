@@ -9,18 +9,36 @@
 <AuthorizeView>
     <h1>Things for Curtis to buy on the walk home</h1>
 
-    <ul>
+    <table>
+        <tr>
+            <th>Quantity</th>
+            <th>Item</th>
+            <th>Image</th>
+            <th>Update</th>
+            <th>Delete</th>
+        </tr>
         @foreach (var item in shoppinglist)
         {
-            <li>
-                <input @bind="item.Amount" />
-                <input @bind="item.Name" />
-                <button @onclick="() => UpdateItem(item.ID, item.Name, item.Amount)">Update Item</button>
-                <button @onclick="() => DeleteItem(item.ID)">Delete Item </button>
-            </li>
+            <tr>
+                <td><input @bind="item.Amount" /></td>
+                <td><input @bind="item.Name" /></td>
+                <td>
+                @if (!string.IsNullOrEmpty(item.ImagePath))
+                {
+                    <img src=@item.ImagePath asp-append-version="true" width="300px" />
+                }
+                else
+                {
+                    <button @onclick="() => UploadImage(item.ID)">Upload Image</button>
+                }
+                </td>
+                <td><button @onclick="() => UpdateItem(item.ID, item.Name, item.Amount)">Update Item</button></td>
+                <td><button @onclick="() => DeleteItem(item.ID)">Delete Item </button></td>
+            </tr>
         } <!-- The button needs a lambda onclick to pass the arguments to the function -->
-    </ul>
+    </table>
 
+    <p></p>
     <!-- Binding is very cool I love this feature -->
     <input type="number" placeholder="Quantity" min="1" @bind=newAmount />
     <input placeholder="Item" @bind="newItem" />
@@ -68,5 +86,10 @@
     {
         service.Update(ID, name, amount);
         RefreshList();
+    }
+
+    private void UploadImage(int ID)
+    {
+        // Placeholder for image functionality
     }
 }
