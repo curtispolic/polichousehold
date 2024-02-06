@@ -1,14 +1,9 @@
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using polichousehold.Areas.Identity;
 using polichousehold.Data;
 using polichousehold.Services;
-using Microsoft.Extensions.FileProviders;
-using polichousehold.Repositories;
 using polichousehold.Utilities;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,8 +31,7 @@ builder.Services.AddDbContext<ShoppingContext>(options =>
 });
 builder.Services.AddScoped<ShoppingService>();
 
-// Image upload handling
-builder.Services.AddTransient<IImageUploadRepository, ImageUploadRepository>();
+// File upload handling
 builder.Services.AddTransient<IFileUploadService, FileUploadService>();
 
 var app = builder.Build();

@@ -4,14 +4,10 @@
 @using polichousehold.Data
 @using polichousehold.Models
 @using polichousehold.Utilities
-@using polichousehold.Repositories
 @using Microsoft.AspNetCore.Components.Forms
-@using Microsoft.Extensions.Logging
 
 @inject ShoppingService shoppingService
-@inject ILogger<Shopping> logger
 @inject IFileUploadService fileService
-@inject IImageUploadRepository imageUploadRepository
 
 @namespace polichousehold
 
@@ -20,6 +16,8 @@
     <h1>Things for Curtis to buy on the walk home</h1>
 
     <table>
+        @if (shoppinglist.Count > 0)
+        {
         <tr>
             <th>Quantity</th>
             <th>Item</th>
@@ -27,6 +25,7 @@
             <th>Update</th>
             <th>Delete</th>
         </tr>
+        }
         @foreach (var item in shoppinglist)
         {
             <tr>
@@ -40,11 +39,10 @@
                 else
                 {
                     <EditForm Model="@imageModel" OnValidSubmit="() => HandleFormSubmit(item)" Context="formContext">
-                        File:<InputFile OnChange="@SelectFiles" />
-                        <br />
+                        File:<InputFile OnChange="@SelectFiles"/>
                         <button type="submit">Upload</button>
                     </EditForm>
-                    @if (loading)
+                    @if (uploading)
                     {
                         <span>Uploading...</span>
                     }
@@ -56,7 +54,7 @@
         } <!-- The button needs a lambda onclick to pass the arguments to the function -->
     </table>
 
-    <p></p>
+    <p></p><p></p>
     <!-- Binding is very cool I love this feature -->
     <input type="number" placeholder="Quantity" min="1" @bind=newAmount />
     <input placeholder="Item" @bind="newItem" />
@@ -72,21 +70,15 @@
     private int newAmount;
 
     // For the file uploading
-    bool loading = false;
-    List<string> messages = new();
+    bool uploading = false;
     List<IBrowserFile> files = new();
     int maxFileSize = 1 * 1024 * 1024;
     ImageFile imageModel = new();
-    List<ImageFile> images = new();
 
     protected override async Task OnInitializedAsync()
     {
         // Need to instantiate on Init or it won't work
         RefreshList();
-        messages.Clear();
-        loading = true;
-        await LoadImages();
-        loading = false;
     }
 
     private void RefreshList()
@@ -130,50 +122,26 @@
 
     private async Task HandleFormSubmit(ShoppingItem item)
     {
-        loading = true;
-        messages.Clear();
+        uploading = true;
         var allowedExtenstions = new string[] { ".png", ".jpg", ".jpeg", ".gif" };
-        int count = 0;
+        // This should be only one image but making sure.
         foreach (var file in files)
         {
             try
             {
                 (int statusCode, string statusMessage) = await fileService.UploadFileAsync(file, maxFileSize, allowedExtenstions);
                 if (statusCode == 1)
-                {
-                    messages.Add($"File : {file.Name} uploaded");
                     AddImageToItem(item.ID, statusMessage);
-                    var imageData = new ImageFile
-                        {
-                            ImageName = statusMessage
-                        };
-                    //await imageUploadRepository.UploadImageToDb(imageData);
-                    count++;
-                }
                 else
-                    messages.Add(statusMessage);
+                    Console.WriteLine($"Image status code: {statusMessage}");
 
             }
             catch (Exception ex)
             {
-                messages.Add($"File : {file.Name} Error : {ex.Message}");
-                logger.LogError(ex.Message);
+                System.Console.WriteLine($"Error : {ex.Message}");
             }
         }
 
-        loading = false;
-        messages.Add($"{count}/{files.Count} uploaded");
-    }
-
-    private async Task LoadImages()
-    {
-        try
-        {
-            images = (await imageUploadRepository.GetImages()).ToList();
-        }
-        catch (Exception)
-        {
-            messages.Add("Could not load images");
-        }
+        uploading = false;
     }
 }
