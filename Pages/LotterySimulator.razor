@@ -18,18 +18,74 @@
     <input type="number" placeholder="7" min="1" max="45" @bind=formNumbers[6] />
     Powerball:
     <input type="number" placeholder="1" min="1" max="20" @bind=formPowerball />
-    <button @onclick="AddTicket">Add Ticket</button>
+    <button class="btn-secondary" type="button" @onclick="AddTicket">Add Ticket</button>
+
     <p></p>
+
     Random Tickets:
-    <button @onclick="RandomTicket">Add Random Ticket</button>
+    <input type="number" placeholder="1" min="1" @bind=randomTicketNumber />
+    <button class="btn-secondary" type="button" @onclick="RandomTicket">Add Random Tickets</button>
+
     <p></p>
+
     Draws:
     <input type="number" placeholder="1" min="1" @bind=drawNumber />
-    <button @onclick="DoDraws">Do Draws</button>
+    <button class="btn-secondary" type="button" @onclick="DoDraws">Do Draws</button>
 
     <p></p>
 
+    Division 1 Prize:
+    <input type="number" placeholder="4000000" min="1" @bind=maxPrize />
+
     <h2 style="color: red;">@message</h2>
+
+    <b>With @ticketList.Count tickets and over @drawList.Count draws, you've won the following:</b>
+    <ul>
+        @if (divisionWins[1] > 0)
+        {
+            <li>@divisionWins[1] Division 1 prize(s)</li>
+        }
+        @if (divisionWins[2] > 0)
+        {
+            <li>@divisionWins[2] Division 2 prize(s)</li>
+        }
+        @if (divisionWins[3] > 0)
+        {
+            <li>@divisionWins[3] Division 3 prize(s)</li>
+        }
+        @if (divisionWins[4] > 0)
+        {
+            <li>@divisionWins[4] Division 4 prize(s)</li>
+        }
+        @if (divisionWins[5] > 0)
+        {
+            <li>@divisionWins[5] Division 5 prize(s)</li>
+        }
+        @if (divisionWins[6] > 0)
+        {
+            <li>@divisionWins[6] Division 6 prize(s)</li>
+        }
+        @if (divisionWins[7] > 0)
+        {
+            <li>@divisionWins[7] Division 7 prize(s)</li>
+        }
+        @if (divisionWins[8] > 0)
+        {
+            <li>@divisionWins[8] Division 8 prize(s)</li>
+        }
+        @if (divisionWins[9] > 0)
+        {
+            <li>@divisionWins[9] Division 9 prize(s)</li>
+        }
+    </ul>
+
+    With the Divison 1 Prize being the above amount, and using the average Division 2 - 9 prizes, the following would be true:
+
+    <ul>
+        <li>You would have won $@PrizeAmount() AUD</li>
+        <li>At $16.15 for 12 games, you would have spent roughly $@SpentAmount() AUD</li>
+        <li>You would have waited @drawList.Count() weeks, or @(drawList.Count()/52) years</li>
+    </ul> 
 
     <p></p>
     <table>
@@ -43,7 +99,9 @@
         </tr>
         <tr valign="top">
             <td>
+                <!-- Table displaying the tickets -->
                 <table style="width: 450px">
+                    <!-- Section displayed if there is a selected draw -->
                     @if (ticketList.Count > 0 && selected)
                     {
                         <tr>
@@ -66,7 +124,8 @@
                                 }
                                 @if (selectedDraw.Powerball == ticket.Powerball)
                                 {
-                                    <td style="background-color:rgb(250, 165, 246); border: 1px solid; text-align: center;">@ticket.Powerball</td>
+                                    <td style="background-color:rgb(250, 165, 246);
+                                    border: 1px solid; text-align: center;">@ticket.Powerball</td>
                                 }
                                 else
                                 {
@@ -75,6 +134,7 @@
                             </tr>
                         }
                     }
+                    <!-- Section displayed if there is not a selected draw -->
                     @if (ticketList.Count > 0 && !selected)
                     {
                         <tr>
@@ -95,7 +155,9 @@
                 </table>
             </td>
             <td>
+                <!-- Table displaying the draws -->
                 <table style="width: 450px">
+                    <!-- Header -->
                     @if (drawList.Count > 0)
                     {
                         <tr>
@@ -104,10 +166,12 @@
                             <th>Select Draw</th>
                         </tr>
                     }
+                    <!-- Section for a selected draw -->
                     @if (selected)
                     {
                         @foreach (var draw in drawList)
                         {
+                            // Drawing the selected draw
                             @if (draw == selectedDraw)
                             {
                                 <tr style="background-color:rgb(250, 165, 246); border: 1px solid;">
@@ -117,7 +181,7 @@
                                     }
                                     <td style="border: 1px solid; text-align: center;">@draw.Powerball</td>
                                     <td style="border: 1px solid; text-align: center;">
-                                        <button @onclick="() => SelectDraw(draw)">Select</button>
+                                        <button class="btn-secondary" type="button" @onclick="() => SelectDraw(draw)">Select</button>
                                     </td>
                                 </tr>
                             }
@@ -130,12 +194,13 @@
                                     }
                                     <td style="border: 1px solid; text-align: center;">@draw.Powerball</td>
                                     <td style="border: 1px solid; text-align: center;">
-                                        <button @onclick="() => SelectDraw(draw)">Select</button>
+                                        <button class="btn-secondary" type="button" @onclick="() => SelectDraw(draw)">Select</button>
                                     </td>
                                 </tr>
                             }
                         }
                     }
+                    // Section for no selected draw
                     else
                     {
                         @foreach (var draw in drawList)
@@ -147,7 +212,7 @@
                                 }
                                 <td style="border: 1px solid; text-align: center;">@draw.Powerball</td>
                                 <td style="text-align: center; border: 1px solid;">
-                                    <button @onclick="() => SelectDraw(draw)">Select</button>
+                                    <button class="btn-secondary" type="button" @onclick="() => SelectDraw(draw)">Select</button>
                                 </td>
                             </tr>
                         }
@@ -164,30 +229,60 @@
     private List<int> formNumbers = new List<int> { 0, 0, 0, 0, 0, 0, 0};
     private int formPowerball = 0;
     private int drawNumber = 0;
+    private int randomTicketNumber = 0;
+    private int maxPrize = 4000000;
     private List<LotteryTicket> ticketList = new();
     // Yes I am using the same Object for my draws, they're the same pretty much
     private List<LotteryTicket> drawList = new();
     // The random selected will not be used because of the bool
-    // I could have made this nullable but then there were warnings of accessing a potentially null field
+    // I could have made this nullable but then there are warnings of accessing a potentially null field
     private LotteryTicket selectedDraw = new();
+    private List<int> divisionWins = new List<int> {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; 
+    private List<int> divisionPrizes = new List<int>
+        // TODO: Replace [1] with the jackpot amount
+        { 0, 50000000, 150000, 12000, 500, 190, 80, 47, 20, 12};
     private bool selected = false;
     private string message = "";
+
+    private void RefreshWins()
+    /*
+    Counts the number of wins for each division over the entire set of tickets
+    Should be called every time the number of tickets or draws changes
+    */
+    {
+        divisionWins = new List<int> {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        foreach (var ticket in ticketList)
+        {
+            foreach (var draw in drawList)
+            {
+                divisionWins[ticket.DivisionWin(draw.Numbers, draw.Powerball)]++;
+            }
+        }
+    }
     
     private void AddTicket()
+    // Makes a ticket using the selectors
     {
         if (CheckNumbersAreUnique(formNumbers))
         {
             ticketList.Add(new LotteryTicket(formNumbers, formPowerball));
+            RefreshWins();
         }
     }
 
     private void RandomTicket()
+    // Makes x random tickets where x is the bound integer in the form
     {
-        ticketList.Add(new LotteryTicket());
+        for (int i = 0; i < randomTicketNumber; i++)
+        {
+            ticketList.Add(new LotteryTicket());
+        }
+        RefreshWins();
         message = "";
     }
 
     private bool CheckNumbersAreUnique(List<int> numbers)
+    // Checks that there are no repeated numbers in the list
     {
         List<int> uniques = new();
         foreach (var number in numbers)
@@ -207,16 +302,35 @@
     }
 
     private void DoDraws()
+    // Creates x draws where x is the bound integer
     {
         for (int i = 0; i < drawNumber; i++)
         {
             drawList.Add(new LotteryTicket());
         }
+        RefreshWins();
     }
 
     private void SelectDraw(LotteryTicket draw)
+    // Selects a draw, will also flag that something is selected to prevent a null reference
     {
         selectedDraw = draw;
         selected = true;
+    }
+
+    private decimal PrizeAmount()
+    {
+        decimal temp = 0;
+        for (int i = 1; i < 10; i++)
+        {
+            temp += divisionPrizes[i]*divisionWins[i];
+        }
+
+        return decimal.Round(temp, 2);
+    }
+
+    private decimal SpentAmount()
+    {
+        return decimal.Round(ticketList.Count()*drawList.Count()*1.34583333m, 2 , MidpointRounding.AwayFromZero);
     }
 }
