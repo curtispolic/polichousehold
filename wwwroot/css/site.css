@@ -38,6 +38,15 @@ a, .btn-link {
     color: red;
 }
 
+th {
+    text-align: center;
+    border: 2px solid;
+}
+
+td {
+    padding-left: 5px
+}
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;

@@ -1,0 +1,222 @@
+@page "/Lottery"
+
+@using polichousehold.Models
+
+@namespace polichousehold
+
+<PageTitle>Lottery Simulator</PageTitle>
+<AuthorizeView Context="authContext">
+    <h1>Powerball simulator for Gen &lt3</h1>
+
+    Numbers:
+    <input type="number" placeholder="1" min="1" max="45" @bind=formNumbers[0] />
+    <input type="number" placeholder="2" min="1" max="45" @bind=formNumbers[1] />
+    <input type="number" placeholder="3" min="1" max="45" @bind=formNumbers[2] />
+    <input type="number" placeholder="4" min="1" max="45" @bind=formNumbers[3] />
+    <input type="number" placeholder="5" min="1" max="45" @bind=formNumbers[4] />
+    <input type="number" placeholder="6" min="1" max="45" @bind=formNumbers[5] />
+    <input type="number" placeholder="7" min="1" max="45" @bind=formNumbers[6] />
+    Powerball:
+    <input type="number" placeholder="1" min="1" max="20" @bind=formPowerball />
+    <button @onclick="AddTicket">Add Ticket</button>
+    <p></p>
+    Random Tickets:
+    <button @onclick="RandomTicket">Add Random Ticket</button>
+    <p></p>
+    Draws:
+    <input type="number" placeholder="1" min="1" @bind=drawNumber />
+    <button @onclick="DoDraws">Do Draws</button>
+
+    <p></p>
+
+    <h2 style="color: red;">@message</h2>
+
+    <p></p>
+    <table>
+        <tr>
+            <td>
+                <b>Tickets</b>
+            </td>
+            <td>
+                <b>Draws</b>
+            </td>
+        </tr>
+        <tr valign="top">
+            <td>
+                <table style="width: 450px">
+                    @if (ticketList.Count > 0 && selected)
+                    {
+                        <tr>
+                            <th colspan="7">Numbers</th>
+                            <th style="width: 20%">Powerball</th>
+                        </tr>
+                         @foreach (var ticket in ticketList)
+                        {
+                            <tr style="border: 1px solid;">
+                                @foreach (var number in ticket.Numbers)
+                                {
+                                    @if (selectedDraw.Numbers.Contains(number))
+                                    {
+                                        <td style="background-color:rgb(250, 165, 246);">@number</td>
+                                    }
+                                    else
+                                    {
+                                        <td>@number</td>
+                                    }  
+                                }
+                                @if (selectedDraw.Powerball == ticket.Powerball)
+                                {
+                                    <td style="background-color:rgb(250, 165, 246); border: 1px solid; text-align: center;">@ticket.Powerball</td>
+                                }
+                                else
+                                {
+                                    <td style="border: 1px solid; text-align: center;">@ticket.Powerball</td>
+                                }  
+                            </tr>
+                        }
+                    }
+                    @if (ticketList.Count > 0 && !selected)
+                    {
+                        <tr>
+                            <th colspan="7">Numbers</th>
+                            <th style="width: 20%">Powerball</th>
+                        </tr>
+                         @foreach (var ticket in ticketList)
+                        {
+                            <tr style="border: 1px solid;">
+                                @foreach (var number in ticket.Numbers)
+                                {
+                                    <td>@number</td>
+                                }
+                                <td style="border: 1px solid; text-align: center;">@ticket.Powerball</td>
+                            </tr>
+                        }
+                    }
+                </table>
+            </td>
+            <td>
+                <table style="width: 450px">
+                    @if (drawList.Count > 0)
+                    {
+                        <tr>
+                            <th colspan="7">Numbers</th>
+                            <th style="width: 20%">Powerball</th>
+                            <th>Select Draw</th>
+                        </tr>
+                    }
+                    @if (selected)
+                    {
+                        @foreach (var draw in drawList)
+                        {
+                            @if (draw == selectedDraw)
+                            {
+                                <tr style="background-color:rgb(250, 165, 246); border: 1px solid;">
+                                    @foreach (var number in draw.Numbers)
+                                    {
+                                        <td>@number</td>
+                                    }
+                                    <td style="border: 1px solid; text-align: center;">@draw.Powerball</td>
+                                    <td style="border: 1px solid; text-align: center;">
+                                        <button @onclick="() => SelectDraw(draw)">Select</button>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                <tr style="border: 1px solid;">
+                                    @foreach (var number in draw.Numbers)
+                                    {
+                                        <td>@number</td>
+                                    }
+                                    <td style="border: 1px solid; text-align: center;">@draw.Powerball</td>
+                                    <td style="border: 1px solid; text-align: center;">
+                                        <button @onclick="() => SelectDraw(draw)">Select</button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                    else
+                    {
+                        @foreach (var draw in drawList)
+                        {
+                            <tr style="border: 1px solid;">
+                                @foreach (var number in draw.Numbers)
+                                {
+                                    <td>@number</td>
+                                }
+                                <td style="border: 1px solid; text-align: center;">@draw.Powerball</td>
+                                <td style="text-align: center; border: 1px solid;">
+                                    <button @onclick="() => SelectDraw(draw)">Select</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </table>
+            </td>
+        </tr>
+    </table>
+    <p></p><p></p>
+</AuthorizeView>
+
+@code
+{
+    private List<int> formNumbers = new List<int> { 0, 0, 0, 0, 0, 0, 0};
+    private int formPowerball = 0;
+    private int drawNumber = 0;
+    private List<LotteryTicket> ticketList = new();
+    // Yes I am using the same Object for my draws, they're the same pretty much
+    private List<LotteryTicket> drawList = new();
+    // The random selected will not be used because of the bool
+    // I could have made this nullable but then there were warnings of accessing a potentially null field
+    private LotteryTicket selectedDraw = new();
+    private bool selected = false;
+    private string message = "";
+    
+    private void AddTicket()
+    {
+        if (CheckNumbersAreUnique(formNumbers))
+        {
+            ticketList.Add(new LotteryTicket(formNumbers, formPowerball));
+        }
+    }
+
+    private void RandomTicket()
+    {
+        ticketList.Add(new LotteryTicket());
+        message = "";
+    }
+
+    private bool CheckNumbersAreUnique(List<int> numbers)
+    {
+        List<int> uniques = new();
+        foreach (var number in numbers)
+        {
+            if (uniques.Contains(number))
+            {
+                message = "Numbers must be unique";
+                return false;
+            }
+            else
+            {
+                uniques.Add(number);
+            }
+        }
+        message = "";
+        return true;
+    }
+
+    private void DoDraws()
+    {
+        for (int i = 0; i < drawNumber; i++)
+        {
+            drawList.Add(new LotteryTicket());
+        }
+    }
+
+    private void SelectDraw(LotteryTicket draw)
+    {
+        selectedDraw = draw;
+        selected = true;
+    }
+}
