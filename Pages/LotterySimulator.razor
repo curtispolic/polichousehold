@@ -35,7 +35,7 @@
     <p></p>
 
     Division 1 Prize:
-    <input type="number" placeholder="4000000" min="1" @bind=maxPrize />
+    <input type="number" placeholder="4000000" min="1" @bind=divisionPrizes[1] />
 
     <h2 style="color: red;">@message</h2>
 
@@ -82,9 +82,18 @@
     With the Divison 1 Prize being the above amount, and using the average Division 2 - 9 prizes, the following would be true:
 
     <ul>
-        <li>You would have won $@PrizeAmount() AUD</li>
-        <li>At $16.15 for 12 games, you would have spent roughly $@SpentAmount() AUD</li>
+        <li>You would have won $@PrizeAmount().ToString("N2") AUD</li>
+        <li>At $16.15 for 12 games, you would have spent roughly $@SpentAmount().ToString("N2") AUD</li>
         <li>You would have waited @drawList.Count() weeks, or @(drawList.Count()/52) years</li>
+        @if (DeltaAmount() > 0)
+        {
+            <li>You would have had a net gain of <b>$@DeltaAmount().ToString("N2")</b></li>
+        }
+        else if (DeltaAmount() < 0)
+        {
+            <li>You would have had a net loss of <b>$@((DeltaAmount()*-1).ToString("N2"))</b></li>
+        }
+        
     </ul> 
 
     <p></p>
@@ -230,7 +239,6 @@
     private int formPowerball = 0;
     private int drawNumber = 0;
     private int randomTicketNumber = 0;
-    private int maxPrize = 4000000;
     private List<LotteryTicket> ticketList = new();
     // Yes I am using the same Object for my draws, they're the same pretty much
     private List<LotteryTicket> drawList = new();
@@ -240,7 +248,7 @@
     private List<int> divisionWins = new List<int> {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; 
     private List<int> divisionPrizes = new List<int>
         // TODO: Replace [1] with the jackpot amount
-        { 0, 50000000, 150000, 12000, 500, 190, 80, 47, 20, 12};
+        { 0, 4000000, 150000, 12000, 500, 190, 80, 47, 20, 12};
     private bool selected = false;
     private string message = "";
 
@@ -326,11 +334,16 @@
             temp += divisionPrizes[i]*divisionWins[i];
         }
 
-        return decimal.Round(temp, 2);
+        return decimal.Round(temp, 2)*1.00m;
     }
 
     private decimal SpentAmount()
     {
         return decimal.Round(ticketList.Count()*drawList.Count()*1.34583333m, 2 , MidpointRounding.AwayFromZero);
+    }
+
+    private decimal DeltaAmount()
+    {
+        return PrizeAmount() - SpentAmount();
     }
 }
