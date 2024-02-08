@@ -18,12 +18,16 @@
     <input type="number" placeholder="7" min="1" max="45" @bind=formNumbers[6] />
     Powerball:
     <input type="number" placeholder="1" min="1" max="20" @bind=formPowerball />
+     or Powerhit:
+    <input type="checkbox" name="powerhit" value="Powerhit?" @bind=formPowerhit />
     <button class="btn-secondary" type="button" @onclick="AddTicket">Add Ticket</button>
 
     <p></p>
 
     Random Tickets:
     <input type="number" placeholder="1" min="1" @bind=randomTicketNumber />
+    Powerhit:
+    <input type="checkbox" name="randomPowerhit" value="Powerhit?" @bind=formRandomPowerhit />
     <button class="btn-secondary" type="button" @onclick="RandomTicket">Add Random Tickets</button>
 
     <p></p>
@@ -131,14 +135,29 @@
                                         <td>@number</td>
                                     }  
                                 }
-                                @if (selectedDraw.Powerball == ticket.Powerball)
+                                @if (selectedDraw.Powerball == ticket.Powerball || ticket.Powerball == 0)
                                 {
-                                    <td style="background-color:rgb(250, 165, 246);
-                                    border: 1px solid; text-align: center;">@ticket.Powerball</td>
+                                    @if (ticket.Powerball != 0)
+                                    {
+                                        <td style="background-color:rgb(250, 165, 246);
+                                            border: 1px solid; text-align: center;">@ticket.Powerball</td>
+                                    }
+                                    else
+                                    {
+                                        <td style="background-color:rgb(250, 165, 246);
+                                            border: 1px solid; text-align: center;">PH</td>
+                                    }
                                 }
                                 else
                                 {
-                                    <td style="border: 1px solid; text-align: center;">@ticket.Powerball</td>
+                                    @if (ticket.Powerball != 0)
+                                    {
+                                        <td style="border: 1px solid; text-align: center;">@ticket.Powerball</td>
+                                    }
+                                    else
+                                    {
+                                        <td style="border: 1px solid; text-align: center;">PH</td>
+                                    }
                                 }  
                             </tr>
                         }
@@ -157,7 +176,14 @@
                                 {
                                     <td>@number</td>
                                 }
-                                <td style="border: 1px solid; text-align: center;">@ticket.Powerball</td>
+                                @if (ticket.Powerball != 0)
+                                {
+                                    <td style="border: 1px solid; text-align: center;">@ticket.Powerball</td>
+                                }
+                                else
+                                {
+                                    <td style="border: 1px solid; text-align: center;">PH</td>
+                                }
                             </tr>
                         }
                     }
@@ -239,6 +265,8 @@
     private int formPowerball = 0;
     private int drawNumber = 0;
     private int randomTicketNumber = 0;
+    private bool formPowerhit = false;
+    private bool formRandomPowerhit = false;
     private List<LotteryTicket> ticketList = new();
     // Yes I am using the same Object for my draws, they're the same pretty much
     private List<LotteryTicket> drawList = new();
@@ -273,7 +301,14 @@
     {
         if (CheckNumbersAreUnique(formNumbers))
         {
-            ticketList.Add(new LotteryTicket(formNumbers, formPowerball));
+            if (formPowerhit)
+            {
+                ticketList.Add(new LotteryTicket(formNumbers, 0));
+            }
+            else
+            {
+                ticketList.Add(new LotteryTicket(formNumbers, formPowerball));
+            }
             RefreshWins();
         }
     }
@@ -283,7 +318,7 @@
     {
         for (int i = 0; i < randomTicketNumber; i++)
         {
-            ticketList.Add(new LotteryTicket());
+            ticketList.Add(new LotteryTicket(formRandomPowerhit));
         }
         RefreshWins();
         message = "";
@@ -339,7 +374,21 @@
 
     private decimal SpentAmount()
     {
-        return decimal.Round(ticketList.Count()*drawList.Count()*1.34583333m, 2 , MidpointRounding.AwayFromZero);
+        int normal = 0; int powerhit = 0;
+
+        foreach (var ticket in ticketList)
+        {
+            if (ticket.Powerball == 0)
+            {
+                powerhit += drawList.Count();
+            }
+            else
+            {
+                normal += drawList.Count();
+            }
+        }
+
+        return decimal.Round(normal*1.34583333m + powerhit*26.95m, 2 , MidpointRounding.AwayFromZero);
     }
 
     private decimal DeltaAmount()

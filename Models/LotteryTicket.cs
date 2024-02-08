@@ -10,6 +10,7 @@ public class LotteryTicket
 
     public LotteryTicket()
     {
+        // Creates a randomized ticket
         Numbers = new();
         Random random = new();
         while (Numbers.Count() < 7)
@@ -23,8 +24,32 @@ public class LotteryTicket
         Numbers.Sort();
     }
 
+    public LotteryTicket(bool powerhit)
+    {
+        Numbers = new();
+        Random random = new();
+        while (Numbers.Count() < 7)
+        {
+            int temp = random.Next(1,36);
+            if (!Numbers.Contains(temp))
+                Numbers.Add(temp);
+        }
+        
+        if (powerhit)
+        {
+            Powerball = 0;
+        }
+        else
+        {
+            Powerball = random.Next(1,21);
+        }
+
+        Numbers.Sort();
+    }
+
     public LotteryTicket(List<int> numbers, int powerball)
     {
+        // Creates a ticket with the inputted values
         Numbers = numbers;
         Powerball = powerball;
 
@@ -33,8 +58,12 @@ public class LotteryTicket
 
     public int DivisionWin(List<int> drawnNumbers, int drawnPowerball)
     {
+        // Returns the division prize won for the ticket for the inputted draw
+        // Returns 0 in the event of no win
         int matches = 0;
         bool matchedPowerball = Powerball == drawnPowerball;
+        // Powerhit is a guaranteed powerball match, represented by Powerball == 0
+        if (Powerball == 0) matchedPowerball = true;
         foreach (int num in drawnNumbers)
         {
             if (Numbers.Contains(num))
