@@ -75,9 +75,8 @@
     int maxFileSize = 1 * 1024 * 1024;
     ImageFile imageModel = new();
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        // Need to instantiate on Init or it won't work
         RefreshList();
     }
 
@@ -115,7 +114,7 @@
         RefreshList();
     }
 
-    private async void SelectFiles(InputFileChangeEventArgs e)
+    private void SelectFiles(InputFileChangeEventArgs e)
     {
         files = e.GetMultipleFiles(maxFileSize).ToList();
     }

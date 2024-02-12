@@ -1,4 +1,4 @@
-@page "/Lottery"
+@page "/LotterySimulator"
 
 @using polichousehold.Models
 
@@ -275,7 +275,6 @@
     private LotteryTicket selectedDraw = new();
     private List<int> divisionWins = new List<int> {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; 
     private List<int> divisionPrizes = new List<int>
-        // TODO: Replace [1] with the jackpot amount
         { 0, 4000000, 150000, 12000, 500, 190, 80, 47, 20, 12};
     private bool selected = false;
     private string message = "";

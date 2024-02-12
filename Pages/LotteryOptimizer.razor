@@ -1,0 +1,118 @@
+@page "/LotteryOptimizer"
+
+@using polichousehold.Models
+
+@namespace polichousehold
+
+<PageTitle>Lottery Optimizer</PageTitle>
+<AuthorizeView Context="authContext">
+    <h1>Powerball Optimizer</h1>
+
+    This page creates 1 million "players", each spending $55 on every draw. They will randomly decide whether 
+    or not to buy 0, 1, or 2 Powerhit tickets, then the rest of the money will be spent on regular tickets. The goal 
+    is to determine the best overlap of numbers to maximize winnings. You can choose to discard high division prizes 
+    in order to reduce outliers. This assumes the average division prizes, with a division 1 prize of $4,000,000.
+
+    <p></p>
+
+    Discard the following prizes:
+
+    <p></p>
+
+      Division 1:
+    <input type="checkbox" @bind=discardDivision1 />
+      Division 2:
+    <input type="checkbox" @bind=discardDivision2 />
+      Division 3:
+    <input type="checkbox" @bind=discardDivision3 />
+      Division 4:
+    <input type="checkbox" @bind=discardDivision4 />
+      Division 5:
+    <input type="checkbox" @bind=discardDivision5 />
+      Division 6:
+    <input type="checkbox" @bind=discardDivision6 />
+
+    <p></p>
+
+    <button type="button" class="btn-secondary" @onclick="Optimize">Begin</button>
+
+    @if (loading)
+    {
+        // TODO: show progress of calculating results
+    }
+    else if (finished)
+    {
+        // TODO: display results
+    }
+
+</AuthorizeView>
+
+@code
+{
+    private List<LotteryTicket> ticketList = new();
+    private List<LotteryTicket> drawList = new();
+    private List<int> divisionPrizes = new List<int>
+        { 0, 4000000, 150000, 12000, 500, 190, 80, 47, 20, 12};
+
+
+    private bool discardDivision1 = false;
+    private bool discardDivision2 = false;
+    private bool discardDivision3 = false;
+    private bool discardDivision4 = false;
+    private bool discardDivision5 = false;
+    private bool discardDivision6 = false;
+
+    // Tracking progress of the simulation
+    private bool loading = false;
+    private bool finished = false;
+
+    private void RandomTicket(int tickets, bool powerhit)
+    // Makes input random tickets with or without powerhit
+    {
+        for (int i = 0; i < tickets; i++)
+        {
+            ticketList.Add(new LotteryTicket(powerhit));
+        }
+    }
+
+    private void DoDraws(int draws)
+    // Creates x draws where x is the bound integer
+    {
+        for (int i = 0; i < draws; i++)
+        {
+            drawList.Add(new LotteryTicket());
+        }
+    }
+
+    private void Optimize()
+    {
+        loading = true;
+    }
+
+    private class Player
+    {
+        private List<LotteryTicket> tickets { get; set; }
+        private int winnings { get; set; }
+    
+        private Player()
+        {
+            Random random = new(); tickets = new(); winnings = 0;
+            int powerhits = random.Next(0, 3);
+            switch (powerhits)
+            {
+                case 2:
+                    tickets.Add(new LotteryTicket(true));
+                    tickets.Add(new LotteryTicket(true));
+                    break;
+                case 1:
+                    tickets.Add(new LotteryTicket(true));
+                    // Howver many tickets makes up the rest of the money
+                    for (int i = 0; )
+                    break;
+                case 0:
+                    // Double whatever I did above
+                    break;
+            }
+        }
+    }
+}
